@@ -49,8 +49,8 @@
         [DisableRequestSizeLimit]
         public async Task<IActionResult> SendMatrixAndVectorToServer(string matrixFileName, string vectorFileName)
         {
-            var matrix = await _serializer.DeserializeMatrix(Path.Combine(_pathToFiles, matrixFileName + ".xml"));
-            var vector = await _serializer.DeserializeVector(Path.Combine(_pathToFiles, vectorFileName + ".xml"));
+            var matrix = await _serializer.DeserializeMatrix(Path.Combine(_pathToFiles, matrixFileName + ".txt"));
+            var vector = await _serializer.DeserializeVector(Path.Combine(_pathToFiles, vectorFileName + ".txt"));
             var data = new DataModel
             {
                 Matrix = matrix,
@@ -58,7 +58,7 @@
             };
 
             var result = await _httpClient.SendFileToServer(data);
-            return File(_serializer.SerializeVector(result.Vector), "application/xml", "VectorX.xml");
+            return File(_serializer.SerializeVector(result.Vector), "text/plain", "X.txt");
         }
     }
 }

@@ -21,6 +21,7 @@
         /// <inheritdoc/>
         public async Task<Matrix> DeserializeMatrix(string path)
         {
+            var initNumbers = true;
             float[][] numbers = Array.Empty<float[]>();
             using var reader = new StreamReader(path);
             string line;
@@ -28,6 +29,12 @@
             while ((line = await reader.ReadLineAsync()) != null)
             {
                 string[] elements = line.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (initNumbers)
+                {
+                    numbers = new float[elements.Length][];
+                    initNumbers = false;
+                }
+
                 numbers[i] = new float[elements.Length];
                 for (int j = 0; j < elements.Length; j++)
                 {
@@ -43,17 +50,15 @@
         /// <inheritdoc/>
         public async Task<Vector> DeserializeVector(string path)
         {
-            float[] numbers = Array.Empty<float>();
+            var numbers = new List<float>();
             using var reader = new StreamReader(path);
             string line;
-            int i = 0;
             while ((line = await reader.ReadLineAsync()) != null)
             {
-                numbers[i] = float.Parse(line);
-                i++;
+                numbers.Add(float.Parse(line));
             }
 
-            return new Vector(numbers);
+            return new Vector(numbers.ToArray());
         }
     }
 }
