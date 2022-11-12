@@ -1,6 +1,5 @@
 ﻿namespace CourseWork.Web.Configuration
 {
-    using CourseWork.Models;
     using CourseWork.Web.Interfaces;
     using CourseWork.Web.Services;
     using Microsoft.Extensions.DependencyInjection;
