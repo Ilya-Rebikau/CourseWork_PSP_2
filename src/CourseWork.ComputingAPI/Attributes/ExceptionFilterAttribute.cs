@@ -1,4 +1,4 @@
-﻿namespace CourseWork.DistributionAPI.Attributes
+﻿namespace CourseWork.ComputingAPI.Attributes
 {
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Mvc.Filters;
@@ -16,7 +16,7 @@
             {
                 context.Result = new BadRequestObjectResult(context.Exception)
                 {
-                    Value = "Недостаточно оперативной памяти на распределительном сервере для таких данных!",
+                    Value = "Недостаточно оперативной памяти на вычислительном сервере для таких данных!",
                     StatusCode = 500,
                 };
             }

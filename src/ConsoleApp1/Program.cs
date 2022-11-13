@@ -1,6 +1,5 @@
 ﻿using ConsoleApp1;
 using System.Diagnostics;
-using System.Linq;
 
 var matrix = new float[][]
 {
@@ -34,7 +33,7 @@ for (int i = 0, k = 0; i < matrix.Length; i++, k++)
         servers[z].stroku = new Dictionary<int, float[]>();
     }
 
-    servers[k].strokaToSend = CopyArray(matrix[i]);
+    //servers[k].strokaToSend = CopyArray(matrix[i]);
     for (int j = 0; j < matrix.Length;)
     {
         for (int z = 0; z < serversCount; z++)
@@ -51,7 +50,8 @@ for (int i = 0, k = 0; i < matrix.Length; i++, k++)
 
     for (int z = 0; z < serversCount; z++)
     {
-        servers[z].strokaToGet = servers[k].strokaToSend;
+        servers[z].strokaToGet = CopyArray(matrix[i]);
+        //servers[z].strokaToGet = servers[k].strokaToSend;
         servers[z].Minus(i);
     }
 
@@ -131,21 +131,6 @@ float[] CopyArray(float[] arrayToCopy)
     }
 
     return newArray;
-}
-
-float[][] CopyMatrix(float[][] matrixToCopy)
-{
-    var newMatrix = new float[matrixToCopy.Length][];
-    for (int i = 0; i < matrixToCopy.Length; i++)
-    {
-        newMatrix[i] = new float[matrixToCopy[i].Length];
-        for (int j = 0; j < matrixToCopy[i].Length; j++)
-        {
-            newMatrix[i][j] = matrixToCopy[i][j];
-        }
-    }
-
-    return newMatrix;
 }
 
 void VectorToDebug(float[] vector)

@@ -1,4 +1,6 @@
-﻿namespace CourseWork.Models
+﻿using System.Text;
+
+namespace CourseWork.Models
 {
     /// <summary>
     /// Представляет модель вектора
@@ -61,6 +63,17 @@
         public override int GetHashCode()
         {
             return Size.GetHashCode();
+        }
+
+        public override string ToString()
+        {
+            var sb = new StringBuilder();
+            for (int i = 0; i < Numbers.Length; i++)
+            {
+                sb.AppendLine($"{Numbers[i]}");
+            }
+
+            return sb.ToString();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿namespace CourseWork.DistributionAPI.Configuration
 {
+    using CourseWork.DistributionAPI.Interfaces;
     using Microsoft.Extensions.DependencyInjection;
+    using RestEase;
 
     /// <summary>
     /// Конфигурация сервисов API.
@@ -19,6 +21,21 @@
             services.AddSwaggerGen();
             services.AddControllers();
             services.AddHttpClient();
+            services.AddScoped(scope =>
+            {
+                var baseUrl = configuration["FirstComputingApiAddress"];
+                return RestClient.For<IFirstComputingHttpClient>(baseUrl);
+            });
+            services.AddScoped(scope =>
+            {
+                var baseUrl = configuration["SecondComputingApiAddress"];
+                return RestClient.For<ISecondComputingHttpClient>(baseUrl);
+            });
+            services.AddScoped(scope =>
+            {
+                var baseUrl = configuration["ThirdComputingApiAddress"];
+                return RestClient.For<IThirdComputingHttpClient>(baseUrl);
+            });
             return services;
         }
     }

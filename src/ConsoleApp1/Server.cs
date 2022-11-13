@@ -2,7 +2,7 @@
 {
     internal class Server
     {
-        public float[] strokaToSend;
+        //public float[] strokaToSend;
         public Dictionary<int, float[]> stroku;
         public float precision = 0.001F;
         public float[] strokaToGet;
@@ -25,8 +25,8 @@
                     var indexOfFirstNotZero = FirstNotZero(stroku.Values.ElementAt(i));
                     var valueOfFirstNotZero = stroku.Values.ElementAt(i)[indexOfFirstNotZero];
                     var secondValue = strokaToGet[indexOfFirstNotZero];
-                    if (!CompareStroku(stroku.Values.ElementAt(i), strokaToSend))
-                    {
+                    //if (!CompareStroku(stroku.Values.ElementAt(i), strokaToSend))
+                    //{
                         for (int j = 0; j < stroku.Values.ElementAt(i).Length; j++)
                         {
                             var currentValue = stroku.Values.ElementAt(i)[j];
@@ -41,7 +41,7 @@
                                 stroku.Values.ElementAt(i)[j] -= removeValue;
                             }
                         }
-                    }
+                    //}
                 }
             }
         }
@@ -52,24 +52,24 @@
             return stroka.ToList().IndexOf(notZero);
         }
 
-        private bool CompareStroku(float[] stroka1, float[] stroka2)
-        {
-            try
-            {
-                for (int i = 0; i < stroka1.Length; i++)
-                {
-                    if (stroka1[i] != stroka2[i])
-                    {
-                        return false;
-                    }
-                }
+        //private bool CompareStroku(float[] stroka1, float[] stroka2)
+        //{
+        //    try
+        //    {
+        //        for (int i = 0; i < stroka1.Length; i++)
+        //        {
+        //            if (stroka1[i] != stroka2[i])
+        //            {
+        //                return false;
+        //            }
+        //        }
 
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
+        //        return true;
+        //    }
+        //    catch
+        //    {
+        //        return false;
+        //    }
+        //}
     }
 }

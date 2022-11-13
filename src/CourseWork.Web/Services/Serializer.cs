@@ -14,7 +14,7 @@
         {
             var bf = new BinaryFormatter();
             using var ms = new MemoryStream();
-            bf.Serialize(ms, vector);
+            bf.Serialize(ms, vector.ToString());
             return ms.ToArray();
         }
 
