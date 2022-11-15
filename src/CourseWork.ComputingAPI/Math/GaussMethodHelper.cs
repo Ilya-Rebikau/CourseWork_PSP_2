@@ -47,33 +47,5 @@
                 }
             }
         }
-
-        /// <summary>
-        /// Считает конечное значение Х для строки.
-        /// </summary>
-        /// <param name="intermediateXNumber">Промежуточное значение Х.</param>
-        /// <param name="matrixNumber">Множитель перед промежуточным значением Х.</param>
-        /// <returns>Конечный Х.</returns>
-        public static float CalculateX(float intermediateXNumber, float matrixNumber)
-        {
-            if (matrixNumber == 0)
-            {
-                return 0;
-            }
-
-            return intermediateXNumber / matrixNumber;
-        }
-
-        /// <summary>
-        /// Считает промежуточное значение Х.
-        /// </summary>
-        /// <param name="intermediateXNumber">Предыдущее промежуточное значение Х в этой строке.</param>
-        /// <param name="currentX">Полученный конечный Х строки ниже.</param>
-        /// <param name="matrixNumber">Множитель перед промежуточном Х.</param>
-        /// <returns>Промежуточный Х.</returns>
-        public static float CalculateIntermediateX(float intermediateXNumber, float currentX, float matrixNumber)
-        {
-            return intermediateXNumber - matrixNumber * currentX;
-        }
     }
 }

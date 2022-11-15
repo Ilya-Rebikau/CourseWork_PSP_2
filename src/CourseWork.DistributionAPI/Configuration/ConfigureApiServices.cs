@@ -36,6 +36,21 @@
                 var baseUrl = configuration["ThirdComputingApiAddress"];
                 return RestClient.For<IThirdComputingHttpClient>(baseUrl);
             });
+            services.AddScoped(scope =>
+            {
+                var baseUrl = configuration["FourthComputingApiAddress"];
+                return RestClient.For<IFourthComputingHttpClient>(baseUrl);
+            });
+            services.AddScoped(scope =>
+            {
+                var baseUrl = configuration["FifthComputingApiAddress"];
+                return RestClient.For<IFifthComputingHttpClient>(baseUrl);
+            });
+            services.AddScoped(scope =>
+            {
+                var baseUrl = configuration["SixthComputingApiAddress"];
+                return RestClient.For<ISixthComputingHttpClient>(baseUrl);
+            });
             return services;
         }
     }

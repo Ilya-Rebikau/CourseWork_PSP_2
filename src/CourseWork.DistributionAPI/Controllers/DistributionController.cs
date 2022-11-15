@@ -20,9 +20,10 @@
         /// </summary>
         private readonly IComputingHttpClient[] _servers;
 
-        List<GaussHelperModel> _dataFromServers;
-
-        float[] _vectorX;
+        /// <summary>
+        /// Лист с данными от вычислительных серверов.
+        /// </summary>
+        private List<GaussHelperModel> _dataFromServers;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DistributionController"/> class.
@@ -33,11 +34,14 @@
         public DistributionController(
             IFirstComputingHttpClient firstHttpClient,
             ISecondComputingHttpClient secondHttpClient,
-            IThirdComputingHttpClient thirdHttpClient)
+            IThirdComputingHttpClient thirdHttpClient,
+            IFourthComputingHttpClient fourthHttpClient,
+            IFifthComputingHttpClient fifthHttpClient,
+            ISixthComputingHttpClient sixthHttpClient)
         {
             _servers = new IComputingHttpClient[]
             {
-                firstHttpClient, secondHttpClient, thirdHttpClient
+                firstHttpClient
             };
         }
 
@@ -57,6 +61,59 @@
             }
 
             var serversCount = _servers.Length;
+
+            var s = new Stopwatch();
+            s.Start();
+
+            matrixNumbers = await DirectMotion(matrixNumbers, serversCount);
+
+            s.Stop();
+            Debug.WriteLine(s.ElapsedMilliseconds);
+
+            for (int i = 0; i < matrixNumbers.Length; i++)
+            {
+                vectorNumbers[i] = matrixNumbers[i].Last();
+                Array.Resize(ref matrixNumbers[i], matrixNumbers.Length);
+            }
+
+            ReverseMotion(matrixNumbers, vectorNumbers, serversCount);
+            return new DataModel { Vector = new Vector(vectorNumbers) };
+        }
+
+        /// <summary>
+        /// Метод для обратного хода Гаусса.
+        /// </summary>
+        /// <param name="matrixNumbers">Матрица.</param>
+        /// <param name="vectorNumbers">Вектор промежуточных значений Х.</param>
+        /// <param name="serversCount">Количество серверов.</param>
+        private static void ReverseMotion(float[][] matrixNumbers, float[] vectorNumbers, int serversCount)
+        {
+            for (int i = vectorNumbers.Length - 1, k = serversCount - 1; i >= 0; i--)
+            {
+                if (matrixNumbers[i][i] == 0)
+                {
+                    vectorNumbers[i] = 0;
+                }
+                else
+                {
+                    vectorNumbers[i] = vectorNumbers[i] / matrixNumbers[i][i];
+                }
+
+                for (int j = i - 1; j >= 0; j--, k--)
+                {
+                    vectorNumbers[j] = vectorNumbers[j] - matrixNumbers[j][i] * vectorNumbers[i];
+                }
+            }
+        }
+
+        /// <summary>
+        /// Метод для распределённого прямого хода Гаусса
+        /// </summary>
+        /// <param name="matrixNumbers">Числа матрицы.</param>
+        /// <param name="serversCount">Количество серверов.</param>
+        /// <returns>Новая матрица.</returns>
+        private async Task<float[][]> DirectMotion(float[][] matrixNumbers, int serversCount)
+        {
             var matrixLength = matrixNumbers.Length;
             var tasksForSubstract = new List<Task>();
             for (int i = 0, k = 0; i < matrixLength; i++, k++)
@@ -101,7 +158,6 @@
                 }
 
                 await Task.WhenAll(tasksForSubstract.ToArray());
-
                 _dataFromServers = _dataFromServers.OrderBy(d => d.Rows.Keys.First()).ToList();
                 matrixNumbers = Array.Empty<float[]>();
                 for (int z = 0, v = 0, x = 0; x < matrixLength; z++, x++)
@@ -119,61 +175,13 @@
                 }
             }
 
-            for (int i = 0; i < matrixLength; i++)
-            {
-                vectorNumbers[i] = matrixNumbers[i].Last();
-                Array.Resize(ref matrixNumbers[i], matrixLength);
-            }
-
-            _vectorX = vectorNumbers;
-            var tasksForCalculateIntermediateX = new List<Task>();
-            for (int i = vectorNumbers.Length - 1, k = serversCount - 1; i >= 0; i--)
-            {
-                if (k == -1)
-                {
-                    k = serversCount - 1;
-                }
-
-                _vectorX[i] = await _servers[k].CalculateX(new GaussHelperModel
-                {
-                    IntermediateX = _vectorX[i],
-                    MatrixNumber = matrixNumbers[i][i]
-                });
-
-                k--;
-                tasksForCalculateIntermediateX.Clear();
-                for (int j = i - 1; j >= 0; j--, k--)
-                {
-                    if (k == -1)
-                    {
-                        k = serversCount - 1;
-                    }
-
-                    var data = new GaussHelperModel
-                    {
-                        CurrentX = _vectorX[i],
-                        IntermediateX = _vectorX[j],
-                        MatrixNumber = matrixNumbers[j][i]
-                    };
-                    tasksForCalculateIntermediateX.Add(CalculateIntermediateX(k, data, j));
-                }
-
-                await Task.WhenAll(tasksForCalculateIntermediateX.ToArray());
-            }
-
-            return new DataModel { Vector = new Vector(_vectorX)};
+            return matrixNumbers;
         }
 
         private async Task SubstractRowsAndGetResult(int z, GaussHelperModel data)
         {
             var res = await _servers[z].SubstractRowsAndGetResult(data);
             _dataFromServers.Add(res);
-        }
-
-        private async Task CalculateIntermediateX(int k, GaussHelperModel data, int j)
-        {
-            var res = await _servers[k].CalculateIntermediateX(data);
-            _vectorX[j] = res;
         }
     }
 }
