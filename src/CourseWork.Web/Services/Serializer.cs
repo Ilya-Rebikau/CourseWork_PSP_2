@@ -1,6 +1,7 @@
 ﻿namespace CourseWork.Web.Services
 {
     using System.Runtime.Serialization.Formatters.Binary;
+    using System.Text;
     using CourseWork.Models;
     using CourseWork.Web.Interfaces;
 
@@ -12,10 +13,7 @@
         /// <inheritdoc/>
         public byte[] SerializeVector(Vector vector)
         {
-            var bf = new BinaryFormatter();
-            using var ms = new MemoryStream();
-            bf.Serialize(ms, vector.ToString());
-            return ms.ToArray();
+            return Encoding.ASCII.GetBytes(vector.ToString());
         }
 
         /// <inheritdoc/>

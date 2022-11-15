@@ -10,7 +10,7 @@
     /// </summary>
     [Route("[controller]")]
     [ApiController]
-    [ExceptionFilter]
+    //[ExceptionFilter]
     [DisableRequestSizeLimit]
     public class MathsController : ControllerBase
     {

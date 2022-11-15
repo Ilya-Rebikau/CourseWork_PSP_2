@@ -21,10 +21,15 @@
             services.AddControllersWithViews();
             services.AddScoped<ISerializer, Serializer>();
             services.AddHttpClient();
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri(configuration["DistributionApiAddress"]),
+                Timeout = new TimeSpan(24, 0, 0)
+            };
             services.AddScoped(scope =>
             {
                 var baseUrl = configuration["DistributionApiAddress"];
-                return RestClient.For<IDistributionHttpClient>(baseUrl);
+                return RestClient.For<IDistributionHttpClient>(client);
             });
 
             return services;

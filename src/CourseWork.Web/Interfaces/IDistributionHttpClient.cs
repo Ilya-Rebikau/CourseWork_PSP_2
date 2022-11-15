@@ -13,7 +13,7 @@
         /// </summary>
         /// <param name="fileData">Данные файлов.</param>
         /// <returns>Результат с вектором ответов.</returns>
-        [Post("Distribution/DistributeFiles")]
+        [Post("Distribution/DistributeSlae")]
         Task<DataModel> SendFileToServer([Body] DataModel fileData);
     }
 }

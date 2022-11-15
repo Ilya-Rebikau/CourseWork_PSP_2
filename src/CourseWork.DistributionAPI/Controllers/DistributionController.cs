@@ -4,6 +4,7 @@
     using CourseWork.DistributionAPI.Interfaces;
     using CourseWork.Models;
     using Microsoft.AspNetCore.Mvc;
+    using System.Diagnostics;
     using System.Linq;
 
     /// <summary>
@@ -17,7 +18,11 @@
         /// <summary>
         /// Массив HttpClients для всех вычислительных серверов.
         /// </summary>
-        private readonly IComputingHttpClient[] servers;
+        private readonly IComputingHttpClient[] _servers;
+
+        List<GaussHelperModel> _dataFromServers;
+
+        float[] _vectorX;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DistributionController"/> class.
@@ -30,7 +35,7 @@
             ISecondComputingHttpClient secondHttpClient,
             IThirdComputingHttpClient thirdHttpClient)
         {
-            servers = new IComputingHttpClient[]
+            _servers = new IComputingHttpClient[]
             {
                 firstHttpClient, secondHttpClient, thirdHttpClient
             };
@@ -39,31 +44,22 @@
         /// <summary>
         /// Распределяет данные между вычислительными серверами и возвращает результат.
         /// </summary>
-        /// <param name="data">Данные с матрицей и вектором.</param>
+        /// <param name="startData">Данные с матрицей и вектором.</param>
         /// <returns>Результат с вектором Х.</returns>
         [HttpPost("DistributeSlae")]
         public async Task<DataModel> DistributeSlaeAndGetResult([FromBody] DataModel startData)
         {
             var matrixNumbers = startData.Matrix.Numbers;
             var vectorNumbers = startData.Vector.Numbers;
-
-
-            matrixNumbers = new float[][]
-            {
-                new float[] { 4, 7, 13 },
-                new float[] { 9, 15, 12 },
-                new float[] { 5, 1, 8 },
-            };
-            vectorNumbers = new float[] { 14, 26, 32 };
-
-
             for (int i = 0; i < matrixNumbers.Length; i++)
             {
                 matrixNumbers[i] = matrixNumbers[i].Append(vectorNumbers[i]).ToArray();
             }
 
-            int serversCount = servers.Length;
-            for (int i = 0, k = 0; i < matrixNumbers.Length; i++, k++)
+            var serversCount = _servers.Length;
+            var matrixLength = matrixNumbers.Length;
+            var tasksForSubstract = new List<Task>();
+            for (int i = 0, k = 0; i < matrixLength; i++, k++)
             {
                 if (k == serversCount)
                 {
@@ -76,11 +72,11 @@
                     rows.Add(new Dictionary<int, float[]>());
                 }
 
-                for (int j = 0; j < matrixNumbers.Length;)
+                for (int j = 0; j < matrixLength;)
                 {
                     for (int z = 0; z < serversCount; z++)
                     {
-                        if (j == matrixNumbers.Length)
+                        if (j == matrixLength)
                         {
                             break;
                         }
@@ -90,7 +86,8 @@
                     }
                 }
 
-                var dataFromServers = new List<GaussHelperModel>();
+                tasksForSubstract.Clear();
+                _dataFromServers = new List<GaussHelperModel>();
                 for (int z = 0; z < serversCount; z++)
                 {
                     var data = new GaussHelperModel
@@ -100,12 +97,14 @@
                         StartIndex = i
                     };
 
-                    dataFromServers.Add(await servers[z].SubstractRowsAndGetResult(data));
+                    tasksForSubstract.Add(SubstractRowsAndGetResult(z, data));
                 }
 
-                var totalNumber = matrixNumbers.Length;
+                await Task.WhenAll(tasksForSubstract.ToArray());
+
+                _dataFromServers = _dataFromServers.OrderBy(d => d.Rows.Keys.First()).ToList();
                 matrixNumbers = Array.Empty<float[]>();
-                for (int z = 0, v = 0, x = 0; x < totalNumber; z++, x++)
+                for (int z = 0, v = 0, x = 0; x < matrixLength; z++, x++)
                 {
                     if (z == serversCount)
                     {
@@ -113,74 +112,68 @@
                         z = 0;
                     }
 
-                    if (dataFromServers[z].Rows.Count != v && !Contains(matrixNumbers, dataFromServers[z].Rows.Values.ElementAt(v)))
+                    if (_dataFromServers[z].Rows.Count != v && !matrixNumbers.Contains(_dataFromServers[z].Rows.Values.ElementAt(v)))
                     {
-                        matrixNumbers = matrixNumbers.Append(dataFromServers[z].Rows.Values.ElementAt(v)).ToArray();
+                        matrixNumbers = matrixNumbers.Append(_dataFromServers[z].Rows.Values.ElementAt(v)).ToArray();
                     }
                 }
             }
 
-            for (int i = 0; i < matrixNumbers.Length; i++)
+            for (int i = 0; i < matrixLength; i++)
             {
                 vectorNumbers[i] = matrixNumbers[i].Last();
-                Array.Resize(ref matrixNumbers[i], matrixNumbers.Length);
+                Array.Resize(ref matrixNumbers[i], matrixLength);
             }
 
-            var vectorX = vectorNumbers;
-            for (int i = vectorNumbers.Length - 1, k = serversCount - 1; i >= 0; i--, k--)
+            _vectorX = vectorNumbers;
+            var tasksForCalculateIntermediateX = new List<Task>();
+            for (int i = vectorNumbers.Length - 1, k = serversCount - 1; i >= 0; i--)
             {
-                if (k == 0)
+                if (k == -1)
                 {
                     k = serversCount - 1;
                 }
 
-                vectorX[i] = await servers[k].CalculateX(new GaussHelperModel
+                _vectorX[i] = await _servers[k].CalculateX(new GaussHelperModel
                 {
-                    IntermediateX = vectorX[i],
+                    IntermediateX = _vectorX[i],
                     MatrixNumber = matrixNumbers[i][i]
                 });
-                var currentX = vectorX[i];
-                var currentIndex = i;
-                for (int j = i - 1; j >= 0; j--)
+
+                k--;
+                tasksForCalculateIntermediateX.Clear();
+                for (int j = i - 1; j >= 0; j--, k--)
                 {
-                    vectorX[j] = await servers[k].CalculateIntermediateX(new GaussHelperModel
+                    if (k == -1)
                     {
-                        CurrentX = currentX,
-                        IntermediateX = vectorX[j],
-                        MatrixNumber = matrixNumbers[j][currentIndex]
-                    });
+                        k = serversCount - 1;
+                    }
+
+                    var data = new GaussHelperModel
+                    {
+                        CurrentX = _vectorX[i],
+                        IntermediateX = _vectorX[j],
+                        MatrixNumber = matrixNumbers[j][i]
+                    };
+                    tasksForCalculateIntermediateX.Add(CalculateIntermediateX(k, data, j));
                 }
+
+                await Task.WhenAll(tasksForCalculateIntermediateX.ToArray());
             }
 
-            return new DataModel { Vector = new Vector(vectorX)};
+            return new DataModel { Vector = new Vector(_vectorX)};
         }
 
-        /// <summary>
-        /// Проверяет содержит ли матрица строку.
-        /// </summary>
-        /// <param name="matrix">Матрица</param>
-        /// <param name="row">Строка.</param>
-        /// <returns>True если содержит, false - если нет.</returns>
-        private static bool Contains(float[][] matrix, float[] row)
+        private async Task SubstractRowsAndGetResult(int z, GaussHelperModel data)
         {
-            for (int i = 0; i < matrix.Length; i++)
-            {
-                var x = 0;
-                for (int j = 0; j < matrix[i].Length; j++)
-                {
-                    if (matrix[i][j] == row[j])
-                    {
-                        x++;
-                    }
-                }
+            var res = await _servers[z].SubstractRowsAndGetResult(data);
+            _dataFromServers.Add(res);
+        }
 
-                if (x == matrix[i].Length)
-                {
-                    return true;
-                }
-            }
-
-            return false;
+        private async Task CalculateIntermediateX(int k, GaussHelperModel data, int j)
+        {
+            var res = await _servers[k].CalculateIntermediateX(data);
+            _vectorX[j] = res;
         }
     }
 }
