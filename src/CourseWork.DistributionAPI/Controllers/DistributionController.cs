@@ -16,9 +16,9 @@
     public class DistributionController : ControllerBase
     {
         /// <summary>
-        /// Массив HttpClients для всех вычислительных серверов.
+        /// Лист http клиентов для всех вычислительных серверов.
         /// </summary>
-        private readonly IComputingHttpClient[] _servers;
+        private readonly List<IComputingHttpClient> _servers;
 
         /// <summary>
         /// Лист с данными от вычислительных серверов.
@@ -26,23 +26,17 @@
         private List<GaussHelperModel> _dataFromServers;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DistributionController"/> class.
+        /// Http клиенты для вычислительных серверов.
         /// </summary>
-        /// <param name="firstHttpClient">HttpClient для первого вычислительного сервера.</param>
-        /// <param name="secondHttpClient">HttpClient для второго вычислительного сервера.</param>
-        /// <param name="thirdHttpClient">HttpClient для третьего вычислительного сервера.</param>
-        public DistributionController(
-            IFirstComputingHttpClient firstHttpClient,
-            ISecondComputingHttpClient secondHttpClient,
-            IThirdComputingHttpClient thirdHttpClient,
-            IFourthComputingHttpClient fourthHttpClient,
-            IFifthComputingHttpClient fifthHttpClient,
-            ISixthComputingHttpClient sixthHttpClient)
+        private readonly List<IComputingHttpClient> _httpClients;
+
+        /// <summary>
+        /// Инициализирует новый объект класса <see cref="DistributionController"/>.
+        /// </summary>
+        /// <param name="factory">Factory to build list of http clients for computing servers.</param>
+        public DistributionController(IFactory<IComputingHttpClient> factory)
         {
-            _servers = new IComputingHttpClient[]
-            {
-                firstHttpClient
-            };
+            _httpClients = factory.CreateList();
         }
 
         /// <summary>
@@ -60,7 +54,7 @@
                 matrixNumbers[i] = matrixNumbers[i].Append(vectorNumbers[i]).ToArray();
             }
 
-            var serversCount = _servers.Length;
+            var serversCount = _servers.Count;
 
             var s = new Stopwatch();
             s.Start();
