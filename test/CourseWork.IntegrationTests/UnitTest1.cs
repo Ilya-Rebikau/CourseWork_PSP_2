@@ -1,4 +1,4 @@
-namespace CourseWork.UnitTests
+namespace CourseWork.IntegrationTests
 {
     public class Tests
     {

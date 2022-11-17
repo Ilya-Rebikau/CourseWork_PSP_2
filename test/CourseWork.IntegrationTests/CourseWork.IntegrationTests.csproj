@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -13,13 +14,6 @@
     <PackageReference Include="NUnit3TestAdapter" Version="4.2.1" />
     <PackageReference Include="NUnit.Analyzers" Version="3.3.0" />
     <PackageReference Include="coverlet.collector" Version="3.1.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\CourseWork.ComputingAPI\CourseWork.ComputingAPI.csproj" />
-    <ProjectReference Include="..\..\src\CourseWork.DistributionAPI\CourseWork.DistributionAPI.csproj" />
-    <ProjectReference Include="..\..\src\CourseWork.Models\CourseWork.Models.csproj" />
-    <ProjectReference Include="..\..\src\CourseWork.Web\CourseWork.Web.csproj" />
   </ItemGroup>
 
 </Project>
