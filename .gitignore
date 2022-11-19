@@ -361,3 +361,12 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/CourseWork.Web/wwwroot/files/X3.txt
+/src/CourseWork.Web/wwwroot/files/X2.txt
+/src/CourseWork.Web/wwwroot/files/X1.txt
+/src/CourseWork.Web/wwwroot/files/B3.txt
+/src/CourseWork.Web/wwwroot/files/B2.txt
+/src/CourseWork.Web/wwwroot/files/B1.txt
+/src/CourseWork.Web/wwwroot/files/A3.txt
+/src/CourseWork.Web/wwwroot/files/A2.txt
+/src/CourseWork.Web/wwwroot/files/A1.txt
