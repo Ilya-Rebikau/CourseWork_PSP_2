@@ -65,6 +65,7 @@ namespace CourseWork.Models
             return Size.GetHashCode();
         }
 
+        /// <inheritdoc/>
         public override string ToString()
         {
             var sb = new StringBuilder();

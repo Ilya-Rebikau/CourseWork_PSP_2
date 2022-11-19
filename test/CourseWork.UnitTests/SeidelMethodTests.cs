@@ -4,7 +4,7 @@ using CourseWork.Web.Services;
 
 namespace CourseWork.UnitTests
 {
-    public class Tests
+    public class SeidelMethodTests
     {
         private static readonly string _pathToFiles = @"../../../../../src/CourseWork.Web/wwwroot/files";
 
