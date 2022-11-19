@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("CourseWork.UnitTests")]
+[assembly: InternalsVisibleTo("CourseWork.IntegrationTests")]
 
 namespace CourseWork.Web.Interfaces
 {

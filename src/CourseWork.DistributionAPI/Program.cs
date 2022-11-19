@@ -1,17 +1,29 @@
 using CourseWork.DistributionAPI.Configuration;
+using System.Runtime.CompilerServices;
 
-var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddAPIServices(builder.Configuration);
+[assembly: InternalsVisibleTo("CourseWork.IntegrationTests")]
 
-var app = builder.Build();
-if (app.Environment.IsDevelopment())
+namespace CourseWork.DistributionAPI
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    internal class Program
+    {
+        private static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Services.AddAPIServices(builder.Configuration);
+
+            var app = builder.Build();
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+            app.UseHttpsRedirection();
+
+            app.MapControllers();
+
+            app.Run();
+        }
+    }
 }
-
-app.UseHttpsRedirection();
-
-app.MapControllers();
-
-app.Run();

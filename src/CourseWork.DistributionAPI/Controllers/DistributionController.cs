@@ -16,11 +16,6 @@
     public class DistributionController : ControllerBase
     {
         /// <summary>
-        /// Лист http клиентов для всех вычислительных серверов.
-        /// </summary>
-        private readonly List<IComputingHttpClient> _servers;
-
-        /// <summary>
         /// Лист с данными от вычислительных серверов.
         /// </summary>
         private List<GaussHelperModel> _dataFromServers;
@@ -28,7 +23,7 @@
         /// <summary>
         /// Http клиенты для вычислительных серверов.
         /// </summary>
-        private readonly List<IComputingHttpClient> _httpClients;
+        private readonly List<IComputingHttpClient> _servers;
 
         /// <summary>
         /// Инициализирует новый объект класса <see cref="DistributionController"/>.
@@ -36,7 +31,7 @@
         /// <param name="factory">Factory to build list of http clients for computing servers.</param>
         public DistributionController(IFactory<IComputingHttpClient> factory)
         {
-            _httpClients = factory.CreateList();
+            _servers = factory.CreateList();
         }
 
         /// <summary>
@@ -55,15 +50,7 @@
             }
 
             var serversCount = _servers.Count;
-
-            var s = new Stopwatch();
-            s.Start();
-
             matrixNumbers = await DirectMotion(matrixNumbers, serversCount);
-
-            s.Stop();
-            Debug.WriteLine(s.ElapsedMilliseconds);
-
             for (int i = 0; i < matrixNumbers.Length; i++)
             {
                 vectorNumbers[i] = matrixNumbers[i].Last();

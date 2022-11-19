@@ -1,7 +1,3 @@
-// <copyright file="Program.cs" company="IlyaRebikau">
-// Copyright (c) IlyaRebikau. All rights reserved.
-// </copyright>
-
 using CourseWork.ComputingAPI.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
