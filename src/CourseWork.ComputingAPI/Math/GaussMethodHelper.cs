@@ -1,29 +1,19 @@
-﻿namespace CourseWork.ComputingAPI.Math
+﻿using CourseWork.ComputingAPI.Interfaces;
+
+namespace CourseWork.ComputingAPI.Math
 {
     /// <summary>
     /// Содержит необходимые методы для распределённого решения СЛАУ методом Гаусса с циклическим размещением по строкам.
     /// </summary>
-    internal class GaussMethodHelper
+    internal class GaussMethodHelper : IGaussMethodHelper
     {
-        /// <summary>
-        /// Строки с их индексами, из которых необходимо вычесть вычитаемую строку.
-        /// </summary>
+        /// <inheritdoc/>
         public Dictionary<int, float[]> Rows { get; set; }
 
-        /// <summary>
-        /// Вычитаемая строка из остальных строк.
-        /// </summary>
+        /// <inheritdoc/>
         public float[] SubstractedRow { get; set; }
 
-        /// <summary>
-        /// Точность вычислений.
-        /// </summary>
-        public float Precision { get; set; } = 0.001F;
-
-        /// <summary>
-        /// Вычесть из одной строки другую.
-        /// </summary>
-        /// <param name="startIndex">Стартовый индекс.</param>
+        /// <inheritdoc/>
         public void SubstractRows(int startIndex)
         {
             for (int i = 0; i < Rows.Values.Count; i++)

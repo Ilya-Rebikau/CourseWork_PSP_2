@@ -24,32 +24,44 @@ namespace CourseWork.UnitTests
         public async Task CompareResult_WithSeidelMethod_First()
         {
             // Arrange
-            var matrix = await GetTestMatrix("A1");
-            var vector = await GetTestVector("B1");
+            var matrix = await GetTestMatrix("A1.txt");
+            var vector = await GetTestVector("B1.txt");
             var seidelMethod = new SeidelMethod();
 
             // Act
-            var seidelVector = seidelMethod.Solve(matrix, vector);
-            var vectorFromFile = await GetTestVector("X1");
+            void test() => seidelMethod.Solve(matrix, vector);
 
             // Assert
-            Assert.That(seidelVector, Is.EqualTo(vectorFromFile));
+            Assert.Throws<InvalidOperationException>(test);
         }
 
         [Test]
         public async Task CompareResult_WithSeidelMethod_Second()
         {
             // Arrange
-            var matrix = await GetTestMatrix("A2");
-            var vector = await GetTestVector("B2");
+            var matrix = await GetTestMatrix("A2.txt");
+            var vector = await GetTestVector("B2.txt");
             var seidelMethod = new SeidelMethod();
 
             // Act
-            var seidelVector = seidelMethod.Solve(matrix, vector);
-            var vectorFromFile = await GetTestVector("X2");
+            void test() => seidelMethod.Solve(matrix, vector);
 
             // Assert
-            Assert.That(seidelVector, Is.EqualTo(vectorFromFile));
+            Assert.Throws<InvalidOperationException>(test);
+        }
+        [Test]
+        public async Task CompareResult_WithSeidelMethod_Third()
+        {
+            // Arrange
+            var matrix = await GetTestMatrix("A3.txt");
+            var vector = await GetTestVector("B3.txt");
+            var seidelMethod = new SeidelMethod();
+
+            // Act
+            void test() => seidelMethod.Solve(matrix, vector);
+
+            // Assert
+            Assert.Throws<InvalidOperationException>(test);
         }
 
         [Test]
