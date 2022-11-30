@@ -1,5 +1,7 @@
 ﻿namespace CourseWork.ComputingAPI.Configuration
 {
+    using CourseWork.ComputingAPI.Interfaces;
+    using CourseWork.ComputingAPI.Math;
     using Microsoft.Extensions.DependencyInjection;
 
     /// <summary>
@@ -17,6 +19,7 @@
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
             services.AddControllers();
+            services.AddSingleton<IGaussMethodHelper, GaussMethodHelper>();
             return services;
         }
     }

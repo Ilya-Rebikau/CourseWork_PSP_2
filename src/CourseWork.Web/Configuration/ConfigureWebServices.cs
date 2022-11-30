@@ -28,7 +28,6 @@
             };
             services.AddScoped(scope =>
             {
-                var baseUrl = configuration["DistributionApiAddress"];
                 return RestClient.For<IDistributionHttpClient>(client);
             });
 

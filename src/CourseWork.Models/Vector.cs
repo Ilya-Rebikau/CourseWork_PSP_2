@@ -16,7 +16,7 @@ namespace CourseWork.Models
             Numbers = numbers;
             Size = numbers.Length;
         }
-
+        
         /// <summary>
         /// Получает или задаёт числа вектора.
         /// </summary>
