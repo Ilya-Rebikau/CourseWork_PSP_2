@@ -4,6 +4,7 @@
     using CourseWork.Web.Attributes;
     using CourseWork.Web.Interfaces;
     using Microsoft.AspNetCore.Mvc;
+    using System.Diagnostics;
 
     /// <summary>
     /// Контроллер для работы с отправкой и загрузкой файлов.
@@ -49,6 +50,8 @@
         [DisableRequestSizeLimit]
         public async Task<IActionResult> SendMatrixAndVectorToServer(string number)
         {
+            var s = new Stopwatch();
+            s.Restart();
             var matrix = await _serializer.DeserializeMatrix(Path.Combine(_pathToFiles, $"A{number}" + ".txt"));
             var vector = await _serializer.DeserializeVector(Path.Combine(_pathToFiles, $"B{number}" + ".txt"));
             var data = new DataModel
@@ -56,8 +59,12 @@
                 Matrix = matrix,
                 Vector = vector,
             };
-
+            s.Stop();
+            Console.WriteLine($"Чтение начальных данных закончено за {s.ElapsedMilliseconds} мс");
+            s.Restart();
             var result = await _httpClient.SendFileToServer(data);
+            s.Stop();
+            Console.WriteLine($"Решение найдено за {s.ElapsedMilliseconds} мс");
             return File(_serializer.SerializeVector(result.Vector), "text/plain", $"X{number}.txt");
         }
     }

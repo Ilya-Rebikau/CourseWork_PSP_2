@@ -22,7 +22,7 @@
         /// <summary>
         /// Лист с данными от вычислительных серверов.
         /// </summary>
-        private List<GaussHelperModel> _dataFromServers;
+        private readonly List<GaussHelperModel> _dataFromServers = new();
 
         /// <summary>
         /// Http клиенты для вычислительных серверов.
@@ -47,23 +47,43 @@
         public async Task<DataModel> DistributeSlaeAndGetResult([FromBody] DataModel startData)
         {
             var matrixNumbers = startData.Matrix.Numbers;
+            var matrixLength = matrixNumbers.Length;
             var vectorNumbers = startData.Vector.Numbers;
+            var serversCount = _servers.Count;
+            JoinMatrixToVector(matrixNumbers, vectorNumbers);
+            await SendRowsToServers(matrixNumbers, serversCount, matrixLength);
+            await DirectMotion(matrixNumbers, serversCount);
+            matrixNumbers = await GetResultsFromServers(matrixNumbers, serversCount, matrixLength);
+            SeparateMatrixAndVector(matrixNumbers, vectorNumbers);
+            ReverseMotion(matrixNumbers, vectorNumbers, serversCount);
+            return new DataModel { Vector = new Vector(vectorNumbers) };
+        }
+
+        /// <summary>
+        /// Объединяет матрицу и вектор в расширенную матрицу.
+        /// </summary>
+        /// <param name="matrixNumbers">Матрица.</param>
+        /// <param name="vectorNumbers">Вектор.</param>
+        private static void JoinMatrixToVector(float[][] matrixNumbers, float[] vectorNumbers)
+        {
             for (int i = 0; i < matrixNumbers.Length; i++)
             {
                 matrixNumbers[i] = matrixNumbers[i].Append(vectorNumbers[i]).ToArray();
             }
+        }
 
-            var serversCount = _servers.Count;
-            await DirectMotion(matrixNumbers, serversCount);
-            matrixNumbers = await GetResultsFromServers(matrixNumbers, serversCount, startData.Matrix.Size);
+        /// <summary>
+        /// Разделяет расширенную матрицу на обычную матрицу и вектор.
+        /// </summary>
+        /// <param name="matrixNumbers">Расширенная матрица.</param>
+        /// <param name="vectorNumbers">Вектор.</param>
+        private static void SeparateMatrixAndVector(float[][] matrixNumbers, float[] vectorNumbers)
+        {
             for (int i = 0; i < matrixNumbers.Length; i++)
             {
                 vectorNumbers[i] = matrixNumbers[i].Last();
                 Array.Resize(ref matrixNumbers[i], matrixNumbers.Length);
             }
-
-            ReverseMotion(matrixNumbers, vectorNumbers, serversCount);
-            return new DataModel { Vector = new Vector(vectorNumbers) };
         }
 
         /// <summary>
@@ -102,8 +122,6 @@
         {
             var matrixLength = matrixNumbers.Length;
             var tasksForSubstract = new List<Task>();
-            await SendRowsToServers(matrixNumbers, serversCount, matrixLength);
-
             for (int i = 0, k = 0, n = 0; i < matrixLength; i++, k++)
             {
                 if (k == serversCount)
@@ -138,12 +156,13 @@
         /// <returns>Итоговая матрица.</returns>
         private async Task<float[][]> GetResultsFromServers(float[][] matrixNumbers, int serversCount, int matrixLength)
         {
-            _dataFromServers = new List<GaussHelperModel>();
+            var tasksForGetResults = new List<Task>();
             for (int i = 0; i < serversCount; i++)
             {
-                _dataFromServers.Add(await _servers[i].GetResult());
+                tasksForGetResults.Add(GetResult(i));
             }
 
+            await Task.WhenAll(tasksForGetResults);
             for (int i = 0, k = 0; i < matrixLength; i++, k++)
             {
                 var fullDataFromServers = new Dictionary<int, float[]>();
@@ -160,6 +179,20 @@
             }
 
             return matrixNumbers;
+        }
+
+        /// <summary>
+        /// Получает результат в виде обновлённых строк с сервера.
+        /// </summary>
+        /// <param name="i">Номер сервера.</param>
+        /// <returns>Task.</returns>
+        private async Task GetResult(int i)
+        {
+            var result = await _servers[i].GetResult();
+            lock (_objectForLock)
+            {
+                _dataFromServers.Add(result);
+            }
         }
 
         /// <summary>
@@ -202,7 +235,7 @@
                 tasksForSendRows.Add(SendRows(z, data));
             }
 
-            await Task.WhenAll(tasksForSendRows.ToArray());
+            await Task.WhenAll(tasksForSendRows);
         }
 
         /// <summary>
